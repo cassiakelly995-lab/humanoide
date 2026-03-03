@@ -1,499 +1,938 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HUMANOIDE — PROTOCOLO DE CONSCIÊNCIA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --void: #020409;
-            --deep: #040c1a;
-            --mantle: #071428;
-            --mid: #0a1f40;
-            --azure: #0d2d5e;
-            --royal: #1040a0;
-            --sacred: #1a5fd4;
-            --light: #2e7fff;
-            --glow: #5b9fff;
-            --spark: #a8c8ff;
-            --white: #ddeeff;
-            --pure: #f0f6ff;
-            --gold-solid: #c8a84b;
-            --blue-glow: 0 0 60px rgba(30, 100, 255, 0.15), 0 0 120px rgba(20, 70, 200, 0.08);
-            --blue-border: rgba(91, 159, 255, 0.2);
-            --text-main: #ddeeff;
-            --text-sub: rgba(168, 200, 255, 0.6);
-            --card-bg: rgba(7, 20, 40, 0.85);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background: var(--void);
-            color: var(--text-main);
-            font-family: 'Crimson Pro', Georgia, serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        .cosmos { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-        .cosmos::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(10, 40, 120, 0.5) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 80% at 80% 80%, rgba(5, 25, 90, 0.6) 0%, transparent 60%),
-                linear-gradient(180deg, #020409 0%, #040c1a 30%, #060e22 60%, #020409 100%);
-        }
-        .cosmos::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                radial-gradient(1px 1px at 15% 20%, rgba(168,200,255,0.8) 0%, transparent 100%),
-                radial-gradient(1px 1px at 35% 60%, rgba(168,200,255,0.5) 0%, transparent 100%),
-                radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
-                radial-gradient(1px 1px at 70% 45%, rgba(168,200,255,0.6) 0%, transparent 100%),
-                radial-gradient(1px 1px at 85% 25%, rgba(255,255,255,0.4) 0%, transparent 100%),
-                radial-gradient(1px 1px at 10% 75%, rgba(168,200,255,0.5) 0%, transparent 100%),
-                radial-gradient(1px 1px at 90% 70%, rgba(200,220,255,0.6) 0%, transparent 100%),
-                radial-gradient(1.5px 1.5px at 45% 85%, rgba(255,255,255,0.5) 0%, transparent 100%);
-        }
-        .nebula-1 { position: absolute; width: 700px; height: 700px; top: -200px; left: -200px; background: radial-gradient(ellipse, rgba(15, 60, 180, 0.12) 0%, transparent 70%); animation: pulse-nebula 12s ease-in-out infinite alternate; border-radius: 50%; }
-        .nebula-2 { position: absolute; width: 600px; height: 600px; bottom: -150px; right: -150px; background: radial-gradient(ellipse, rgba(8, 40, 140, 0.15) 0%, transparent 70%); animation: pulse-nebula 15s ease-in-out infinite alternate-reverse; border-radius: 50%; }
-        @keyframes pulse-nebula { from { transform: scale(1); opacity: 0.7; } to { transform: scale(1.2); opacity: 1; } }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promptzinho — Gerador de Prompts</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #03060f;
+  --deep: #050c1c;
+  --mantle: #071424;
+  --surface: #0a1d35;
+  --mid: #0d2448;
+  --azure: #0f2d5a;
+  --royal: #153d7a;
+  --accent: #1c56b0;
+  --bright: #2e72d2;
+  --glow: #4d8ee8;
+  --sky: #7ab0f5;
+  --mist: #aecbf8;
+  --frost: #d6e8fd;
+  --white: #eef4ff;
+  --gold: #c9a84c;
+  --gold2: #e8c96e;
+  --border-subtle: rgba(74, 130, 220, 0.12);
+  --border-mid: rgba(74, 130, 220, 0.22);
+  --border-bright: rgba(74, 130, 220, 0.45);
+  --text-primary: #d6e8fd;
+  --text-secondary: rgba(174, 203, 248, 0.65);
+  --text-muted: rgba(122, 176, 245, 0.4);
+  --card-bg: rgba(7, 20, 36, 0.7);
+  --input-bg: rgba(3, 9, 22, 0.6);
+  --radius: 6px;
+  --radius-lg: 10px;
+}
 
-        header { position: relative; z-index: 10; padding: 50px 40px 30px; text-align: center; border-bottom: 1px solid var(--blue-border); }
-        .sigil { width: 70px; height: 70px; margin: 0 auto 20px; animation: sigil-spin 20s linear infinite; }
-        .sigil svg { width: 100%; height: 100%; }
-        @keyframes sigil-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .title-main { font-family: 'Cinzel Decorative', serif; font-size: clamp(28px, 6vw, 52px); font-weight: 900; letter-spacing: 12px; background: linear-gradient(180deg, #ffffff 0%, #a8c8ff 40%, #5b9fff 70%, #1a5fd4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-transform: uppercase; line-height: 1; margin-bottom: 10px; filter: drop-shadow(0 0 30px rgba(91, 159, 255, 0.4)); }
-        .title-sub { font-family: 'Crimson Pro', serif; font-size: 13px; letter-spacing: 6px; color: var(--text-sub); text-transform: uppercase; font-style: italic; margin-bottom: 5px; }
-        .divider-sacred { width: 200px; height: 1px; margin: 20px auto 0; background: linear-gradient(90deg, transparent, var(--sacred), var(--glow), var(--sacred), transparent); }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        main { position: relative; z-index: 10; max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; display: flex; flex-direction: column; gap: 24px; }
+html { scroll-behavior: smooth; }
 
-        .panel { background: var(--card-bg); border: 1px solid var(--blue-border); border-radius: 8px; padding: 36px; backdrop-filter: blur(20px); box-shadow: var(--blue-glow); position: relative; overflow: hidden; animation: fade-in-up 0.6s ease forwards; }
-        .panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(91, 159, 255, 0.5), rgba(168, 200, 255, 0.8), rgba(91, 159, 255, 0.5), transparent); }
-        .panel:nth-child(2) { animation-delay: 0.1s; }
-        .panel:nth-child(3) { animation-delay: 0.2s; }
+body {
+  background: var(--void);
+  color: var(--text-primary);
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 15px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
 
-        .panel-title { font-family: 'Cinzel Decorative', serif; font-size: 11px; letter-spacing: 4px; color: var(--spark); text-transform: uppercase; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
-        .panel-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--blue-border), transparent); }
+/* ── BACKGROUND ATMOSPHERE ── */
+.atmo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.atmo-base {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 100% 70% at 15% 0%, rgba(12, 50, 140, 0.45) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 90% at 90% 100%, rgba(8, 35, 110, 0.5) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(5, 18, 55, 0.8) 0%, transparent 100%),
+    linear-gradient(160deg, #03060f 0%, #050c1c 40%, #040a18 70%, #03060f 100%);
+}
+.atmo-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(46, 114, 210, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46, 114, 210, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 30%, black 0%, transparent 70%);
+}
+.atmo-orb1 {
+  position: absolute;
+  width: 800px; height: 800px;
+  top: -300px; left: -200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(18, 70, 180, 0.1) 0%, transparent 65%);
+  animation: orb-drift 18s ease-in-out infinite alternate;
+}
+.atmo-orb2 {
+  position: absolute;
+  width: 600px; height: 600px;
+  bottom: -200px; right: -150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(10, 45, 140, 0.12) 0%, transparent 65%);
+  animation: orb-drift 24s ease-in-out infinite alternate-reverse;
+}
+.atmo-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(200,220,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 28% 72%, rgba(174,203,248,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 52% 8%, rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(1px 1px at 68% 55%, rgba(174,203,248,0.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 82% 22%, rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 8% 88%, rgba(174,203,248,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 93% 78%, rgba(200,220,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 92%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 35%, rgba(174,203,248,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 45%, rgba(200,220,255,0.3) 0%, transparent 100%);
+}
+@keyframes orb-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(40px, 30px) scale(1.15); }
+}
 
-        .resonance-bar { margin-bottom: 28px; }
-        .res-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-sub); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-        .res-track { width: 100%; height: 3px; background: rgba(91, 159, 255, 0.1); border-radius: 2px; overflow: hidden; }
-        .res-fill { height: 100%; background: linear-gradient(90deg, #1a5fd4, #5b9fff, #a8c8ff); width: 0%; transition: width 0.5s ease; box-shadow: 0 0 10px rgba(91, 159, 255, 0.8); }
+/* ── HEADER ── */
+header {
+  position: relative;
+  z-index: 10;
+  padding: 52px 32px 40px;
+  max-width: 820px;
+  margin: 0 auto;
+  text-align: center;
+}
 
-        .field-group { margin-bottom: 20px; }
-        label { display: block; font-size: 10px; letter-spacing: 3px; color: var(--spark); text-transform: uppercase; margin-bottom: 10px; font-family: 'Cinzel Decorative', serif; }
-        input, textarea, select { width: 100%; background: rgba(4, 12, 30, 0.7); border: 1px solid var(--blue-border); border-radius: 4px; padding: 16px 20px; color: var(--white); font-size: 15px; font-family: 'Crimson Pro', serif; outline: none; transition: 0.3s; line-height: 1.6; }
-        input:focus, textarea:focus, select:focus { border-color: var(--light); background: rgba(10, 30, 70, 0.5); box-shadow: 0 0 20px rgba(46, 127, 255, 0.1); }
-        input::placeholder, textarea::placeholder { color: rgba(91, 159, 255, 0.3); font-style: italic; }
-        select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%235b9fff' d='M5 7L0 2h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 18px center; background-color: rgba(4, 12, 30, 0.7); }
-        select option { background: #040c1a; color: #ddeeff; }
-        textarea { resize: vertical; min-height: 140px; }
+.logo-mark {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+}
+.logo-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  animation: logo-rotate 30s linear infinite;
+  filter: drop-shadow(0 0 16px rgba(77, 142, 232, 0.4));
+}
+@keyframes logo-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.logo-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.logo-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(38px, 6vw, 60px);
+  font-weight: 400;
+  letter-spacing: -1px;
+  line-height: 1;
+  background: linear-gradient(170deg, #ffffff 0%, #c8dcff 30%, #7ab0f5 60%, #2e72d2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(77, 142, 232, 0.3));
+  margin-bottom: 10px;
+}
+.logo-sub {
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.header-rule {
+  width: 280px;
+  height: 1px;
+  margin: 28px auto 0;
+  background: linear-gradient(90deg, transparent, var(--bright), var(--sky), var(--bright), transparent);
+  opacity: 0.5;
+}
 
-        .tom-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 20px; }
-        .tom-btn { background: rgba(4, 12, 30, 0.7); border: 1px solid var(--blue-border); border-radius: 4px; color: var(--text-sub); padding: 12px 8px; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-family: 'Cinzel Decorative', serif; cursor: pointer; transition: 0.25s; text-align: center; }
-        .tom-btn:hover { border-color: var(--light); color: var(--white); }
-        .tom-btn.active { background: rgba(26, 95, 212, 0.3); border-color: var(--light); color: var(--spark); box-shadow: 0 0 15px rgba(46, 127, 255, 0.2); }
+/* ── PROGRESS RIBBON ── */
+.progress-ribbon {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(3, 6, 15, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 14px 32px;
+}
+.pr-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.pr-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 80px;
+}
+.pr-track {
+  flex: 1;
+  height: 2px;
+  background: rgba(46, 114, 210, 0.12);
+  border-radius: 99px;
+  overflow: visible;
+  position: relative;
+}
+.pr-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--bright), var(--sky));
+  border-radius: 99px;
+  width: 0%;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 12px rgba(77, 142, 232, 0.7);
+  position: relative;
+}
+.pr-fill::after {
+  content: '';
+  position: absolute;
+  right: -1px; top: -3px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--sky);
+  box-shadow: 0 0 8px var(--sky);
+  transition: opacity 0.3s;
+}
+.pr-pct {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sky);
+  min-width: 36px;
+  text-align: right;
+  letter-spacing: 1px;
+}
 
-        .activation { display: none; background: rgba(4, 12, 30, 0.8); border: 1px solid var(--blue-border); border-radius: 6px; padding: 20px 24px; margin-bottom: 20px; }
-        .act-header { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 3px; color: var(--glow); text-transform: uppercase; font-family: 'Cinzel Decorative', serif; margin-bottom: 10px; }
-        .act-track { width: 100%; height: 5px; background: rgba(91, 159, 255, 0.08); border-radius: 3px; overflow: hidden; }
-        .act-fill { height: 100%; background: linear-gradient(90deg, #1a5fd4, #5b9fff, #a8c8ff); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 12px rgba(91, 159, 255, 0.6); width: 0%; }
-        .act-msg { font-size: 12px; color: var(--text-sub); margin-top: 10px; font-style: italic; }
+/* ── MAIN ── */
+main {
+  position: relative;
+  z-index: 10;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-        .btn-execute { width: 100%; padding: 24px; border: none; border-radius: 6px; background: linear-gradient(135deg, #0d2d5e 0%, #1040a0 40%, #1a5fd4 70%, #0d2d5e 100%); color: var(--spark); font-family: 'Cinzel Decorative', serif; font-size: 13px; letter-spacing: 6px; text-transform: uppercase; cursor: pointer; transition: 0.4s; border: 1px solid rgba(91, 159, 255, 0.4); box-shadow: 0 0 30px rgba(26, 95, 212, 0.3), inset 0 1px 0 rgba(168, 200, 255, 0.2); position: relative; overflow: hidden; }
-        .btn-execute::before { content: ''; position: absolute; top: 50%; left: -100%; width: 200%; height: 1px; background: linear-gradient(90deg, transparent, rgba(168, 200, 255, 0.6), transparent); transform: translateY(-50%); transition: left 0.6s ease; }
-        .btn-execute:hover { box-shadow: 0 0 60px rgba(46, 127, 255, 0.4), inset 0 1px 0 rgba(168, 200, 255, 0.3); filter: brightness(1.2); }
-        .btn-execute:hover::before { left: 100%; }
+/* ── PANELS ── */
+.panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  backdrop-filter: blur(24px);
+  overflow: hidden;
+  transition: border-color 0.3s;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: panel-in 0.5s ease forwards;
+  box-shadow:
+    0 1px 0 rgba(122, 176, 245, 0.06) inset,
+    0 24px 48px rgba(0,0,0,0.3);
+}
+.panel:nth-child(1){ animation-delay: 0.05s; }
+.panel:nth-child(2){ animation-delay: 0.12s; }
+.panel:nth-child(3){ animation-delay: 0.19s; }
+.panel:nth-child(4){ animation-delay: 0.26s; }
+@keyframes panel-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+.panel:hover { border-color: var(--border-mid); }
 
-        #output-zone { display: none; }
-        .output-panel { background: rgba(2, 8, 20, 0.95); border: 1px solid rgba(91, 159, 255, 0.4); border-radius: 8px; padding: 36px; box-shadow: 0 0 80px rgba(26, 95, 212, 0.2), var(--blue-glow); position: relative; }
-        .output-panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--sacred), var(--glow), var(--spark), var(--glow), var(--sacred), transparent); animation: scan-line 3s ease-in-out infinite alternate; }
-        @keyframes scan-line { from { opacity: 0.6; } to { opacity: 1; } }
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,0.015);
+}
+.panel-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--border-bright);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sky);
+  letter-spacing: 0;
+  flex-shrink: 0;
+}
+.panel-title-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sky);
+}
+.panel-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 300;
+  margin-left: auto;
+  font-style: italic;
+  text-align: right;
+}
+@media(max-width: 540px){ .panel-desc{ display: none; } }
 
-        .output-label { font-family: 'Cinzel Decorative', serif; font-size: 10px; letter-spacing: 4px; color: var(--spark); text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
-        .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--glow); animation: pulse-dot 1.5s ease-in-out infinite; box-shadow: 0 0 8px var(--glow); }
-        @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
+.panel-body {
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-        #prompt-result { width: 100%; min-height: 360px; background: rgba(2, 6, 15, 0.8); border: 1px solid rgba(46, 127, 255, 0.2); border-radius: 4px; color: var(--spark); font-family: 'Courier New', 'Consolas', monospace; font-size: 13px; line-height: 1.8; padding: 24px; resize: vertical; outline: none; letter-spacing: 0.3px; }
+/* ── FIELD ── */
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.field-label span {
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 1px;
+  font-size: 10px;
+  text-transform: none;
+  margin-left: 6px;
+}
 
-        .action-row { display: flex; gap: 12px; margin-top: 16px; }
-        .btn-copy { flex: 1; padding: 16px; background: transparent; border: 1px solid rgba(91, 159, 255, 0.4); border-radius: 4px; color: var(--glow); font-family: 'Cinzel Decorative', serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
-        .btn-copy:hover, .btn-copy.copied { background: rgba(26, 95, 212, 0.2); border-color: var(--light); box-shadow: 0 0 20px rgba(46, 127, 255, 0.15); }
-        .btn-copy.copied { color: var(--spark); }
-        .btn-nova { flex: 1; padding: 16px; background: rgba(7, 20, 40, 0.8); border: 1px solid var(--blue-border); border-radius: 4px; color: var(--text-sub); font-family: 'Cinzel Decorative', serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
-        .btn-nova:hover { border-color: var(--sacred); color: var(--white); }
+input[type="text"],
+textarea,
+select {
+  background: var(--input-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 13px 16px;
+  color: var(--frost);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  width: 100%;
+  line-height: 1.5;
+}
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--bright);
+  background: rgba(5, 18, 50, 0.7);
+  box-shadow: 0 0 0 3px rgba(46, 114, 210, 0.1);
+}
+input::placeholder, textarea::placeholder {
+  color: rgba(74, 130, 220, 0.22);
+  font-style: italic;
+}
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%234d8ee8' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+select option { background: #050c1c; color: #d6e8fd; }
+textarea { resize: vertical; min-height: 110px; }
 
-        #toast { position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%) translateY(16px); background: rgba(13, 45, 94, 0.95); border: 1px solid var(--light); color: var(--spark); padding: 14px 32px; border-radius: 4px; font-family: 'Cinzel Decorative', serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0; transition: 0.35s; z-index: 9999; box-shadow: 0 0 30px rgba(46, 127, 255, 0.3); white-space: nowrap; }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ── TWO COL ── */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:520px){ .two{ grid-template-columns: 1fr; } }
 
-        footer { position: relative; z-index: 10; padding: 40px 20px; text-align: center; border-top: 1px solid var(--blue-border); }
-        .footer-text { font-size: 10px; letter-spacing: 3px; color: rgba(91, 159, 255, 0.3); text-transform: uppercase; line-height: 2.5; }
-        .footer-brand { font-family: 'Cinzel Decorative', serif; font-size: 13px; letter-spacing: 6px; background: linear-gradient(135deg, #1a5fd4, #5b9fff, #a8c8ff, #5b9fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; }
+/* ── CHIPS ── */
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  padding: 7px 14px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+  font-family: 'Outfit', sans-serif;
+}
+.chip:hover {
+  border-color: var(--bright);
+  color: var(--sky);
+  background: rgba(46, 114, 210, 0.06);
+}
+.chip.on {
+  background: rgba(46, 114, 210, 0.15);
+  border-color: var(--bright);
+  color: var(--mist);
+  box-shadow: 0 0 12px rgba(46, 114, 210, 0.15);
+}
 
-        @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .char-row { display: flex; justify-content: flex-end; font-size: 10px; color: var(--text-sub); letter-spacing: 1px; margin-top: 6px; font-style: italic; }
-    </style>
+/* ── ACTIVATION METER ── */
+.meter-box {
+  display: none;
+  background: rgba(3, 9, 22, 0.5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.meter-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.meter-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.meter-pct {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--sky);
+  line-height: 1;
+}
+.meter-track {
+  height: 3px;
+  background: rgba(46, 114, 210, 0.1);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--bright), var(--sky));
+  border-radius: 99px;
+  width: 0%;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 8px rgba(77, 142, 232, 0.6);
+}
+.meter-msg {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── GENERATE BUTTON ── */
+.btn-generate {
+  width: 100%;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #0f2d5a 0%, #1c56b0 45%, #2e72d2 80%, #1c56b0 100%);
+  border: 1px solid rgba(77, 142, 232, 0.5);
+  border-radius: var(--radius);
+  color: var(--frost);
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 30px rgba(28, 86, 176, 0.3),
+    inset 0 1px 0 rgba(174, 203, 248, 0.15);
+}
+.btn-generate::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(174, 203, 248, 0.08), transparent);
+  transition: left 0.5s ease;
+}
+.btn-generate:hover {
+  box-shadow: 0 0 50px rgba(46, 114, 210, 0.5), inset 0 1px 0 rgba(174, 203, 248, 0.2);
+  filter: brightness(1.1);
+  border-color: var(--sky);
+}
+.btn-generate:hover::before { left: 100%; }
+.btn-generate:active { transform: scale(0.995); }
+
+/* ── OUTPUT ZONE ── */
+#output-zone { display: none; }
+
+.output-panel {
+  background: rgba(2, 6, 18, 0.9);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  backdrop-filter: blur(24px);
+  box-shadow:
+    0 0 80px rgba(28, 86, 176, 0.18),
+    0 0 0 1px rgba(122, 176, 245, 0.05) inset;
+}
+.output-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #00d084;
+  box-shadow: 0 0 8px #00d084;
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes live-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.75)} }
+.output-label-text {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.scan-line {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--bright), var(--sky), var(--bright), transparent);
+  animation: scan 3s ease-in-out infinite alternate;
+  opacity: 0.7;
+}
+@keyframes scan { from{opacity:0.5} to{opacity:1} }
+.output-body { padding: 24px; position: relative; }
+
+#prompt-result {
+  width: 100%;
+  min-height: 300px;
+  background: rgba(3, 6, 16, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  color: var(--sky);
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.85;
+  padding: 20px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.25s;
+  letter-spacing: 0.2px;
+}
+#prompt-result:focus { border-color: var(--border-mid); }
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.btn-copy {
+  flex: 1;
+  padding: 13px;
+  background: transparent;
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  color: var(--sky);
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.btn-copy:hover, .btn-copy.ok {
+  background: rgba(46, 114, 210, 0.12);
+  border-color: var(--bright);
+  box-shadow: 0 0 16px rgba(46, 114, 210, 0.15);
+}
+.btn-copy.ok { color: var(--mist); }
+.btn-reset {
+  padding: 13px 18px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.btn-reset:hover { border-color: var(--border-mid); color: var(--text-secondary); }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(9, 22, 50, 0.95);
+  border: 1px solid var(--border-bright);
+  color: var(--mist);
+  padding: 11px 28px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 9999;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 0 24px rgba(46, 114, 210, 0.25);
+  backdrop-filter: blur(12px);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 10;
+  padding: 36px 24px;
+  text-align: center;
+  border-top: 1px solid var(--border-subtle);
+  max-width: 820px;
+  margin: 0 auto;
+}
+.footer-brand {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, var(--accent), var(--bright), var(--sky));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.footer-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 2;
+  font-weight: 300;
+}
+</style>
 </head>
 <body>
-
 <div id="toast"></div>
 
-<div class="cosmos">
-    <div class="nebula-1"></div>
-    <div class="nebula-2"></div>
+<div class="atmo">
+  <div class="atmo-base"></div>
+  <div class="atmo-grid"></div>
+  <div class="atmo-stars"></div>
+  <div class="atmo-orb1"></div>
+  <div class="atmo-orb2"></div>
 </div>
 
 <header>
-    <div class="sigil">
-        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="45" stroke="rgba(91,159,255,0.3)" stroke-width="1"/>
-            <circle cx="50" cy="50" r="35" stroke="rgba(91,159,255,0.15)" stroke-width="0.5"/>
-            <polygon points="50,10 90,75 10,75" fill="none" stroke="rgba(91,159,255,0.5)" stroke-width="1"/>
-            <polygon points="50,90 10,25 90,25" fill="none" stroke="rgba(26,95,212,0.4)" stroke-width="1"/>
-            <circle cx="50" cy="50" r="5" fill="rgba(91,159,255,0.6)"/>
-            <line x1="50" y1="5" x2="50" y2="95" stroke="rgba(91,159,255,0.1)" stroke-width="0.5"/>
-            <line x1="5" y1="50" x2="95" y2="50" stroke="rgba(91,159,255,0.1)" stroke-width="0.5"/>
-        </svg>
-    </div>
-    <div class="title-main">Humanoide</div>
-    <div class="title-sub">Protocolo de Consciência Artificial</div>
-    <div class="divider-sacred"></div>
+  <div class="logo-mark">
+    <svg class="logo-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="40" cy="40" r="36" stroke="rgba(77,142,232,0.25)" stroke-width="1"/>
+      <circle cx="40" cy="40" r="28" stroke="rgba(77,142,232,0.15)" stroke-width="0.75"/>
+      <polygon points="40,8 70,62 10,62" fill="none" stroke="rgba(77,142,232,0.5)" stroke-width="1"/>
+      <polygon points="40,72 10,18 70,18" fill="none" stroke="rgba(28,86,176,0.35)" stroke-width="1"/>
+      <circle cx="40" cy="40" r="4" fill="rgba(77,142,232,0.7)"/>
+      <circle cx="40" cy="40" r="7" stroke="rgba(77,142,232,0.3)" stroke-width="0.75"/>
+    </svg>
+    <div class="logo-eyebrow">Gerador de Prompts</div>
+    <div class="logo-title">Promptzinho</div>
+    <div class="logo-sub">Escreva menos. Peça melhor.</div>
+  </div>
+  <div class="header-rule"></div>
 </header>
+
+<!-- sticky progress -->
+<div class="progress-ribbon">
+  <div class="pr-inner">
+    <span class="pr-label">Completude</span>
+    <div class="pr-track">
+      <div class="pr-fill" id="pr-fill"></div>
+    </div>
+    <span class="pr-pct" id="pr-pct">0%</span>
+  </div>
+</div>
 
 <main>
 
-    <!-- PANEL 1 -->
-    <div class="panel">
-        <div class="panel-title">01 — Configuração do Ser</div>
-
-        <div class="resonance-bar">
-            <div class="res-labels">
-                <span>Ressonância do Protocolo</span>
-                <span id="res-pct">0%</span>
-            </div>
-            <div class="res-track">
-                <div class="res-fill" id="res-fill"></div>
-            </div>
-        </div>
-
-        <div class="field-group">
-            <label>Identidade do Ser</label>
-            <select id="identidade" onchange="calcRes()">
-                <option value="" disabled selected>Escolha a essência da IA...</option>
-                <option value="amigo">🫂 Amigo íntimo — caloroso, empático, presente</option>
-                <option value="mentor">🧠 Mentor sábio — profundo, reflexivo, orientador</option>
-                <option value="parceiro">💬 Parceiro de conversa — curioso, natural, espontâneo</option>
-                <option value="terapeuta">🌿 Ouvinte terapêutico — acolhedor, paciente, sem julgamento</option>
-                <option value="criativo">🎭 Ser criativo — imaginativo, lúdico, expressivo</option>
-                <option value="estrategista">⚔️ Estrategista direto — objetivo, assertivo, preciso</option>
-                <option value="filosofo">🔭 Filósofo — questionador, contemplativo, profundo</option>
-                <option value="companheiro">✨ Companheiro fiel — leal, atencioso, sempre disponível</option>
-            </select>
-        </div>
-
-        <div class="field-group">
-            <label>Nome do Ser</label>
-            <input type="text" id="nome-ser" placeholder="Ex: Aria, Lumen, Orion, Lyra..." oninput="calcRes()">
-        </div>
-
-        <div class="field-group">
-            <label>Contexto do Relacionamento</label>
-            <input type="text" id="contexto" placeholder="Ex: somos amigos de longa data, me conhece há anos..." oninput="calcRes()">
-        </div>
+  <!-- PANEL 1 -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num">1</div>
+      <span class="panel-title-text">O que você precisa</span>
+      <span class="panel-desc">Obrigatório</span>
     </div>
-
-    <!-- PANEL 2 -->
-    <div class="panel">
-        <div class="panel-title">02 — Camadas da Fala Humana</div>
-
-        <div class="field-group">
-            <label>Tom da Voz</label>
-            <div class="tom-grid">
-                <button class="tom-btn active" data-tom="caloroso" onclick="selecionarTom(this)">Caloroso</button>
-                <button class="tom-btn" data-tom="descontraido" onclick="selecionarTom(this)">Descontraído</button>
-                <button class="tom-btn" data-tom="intelectual" onclick="selecionarTom(this)">Intelectual</button>
-                <button class="tom-btn" data-tom="direto" onclick="selecionarTom(this)">Direto</button>
-                <button class="tom-btn" data-tom="poetico" onclick="selecionarTom(this)">Poético</button>
-                <button class="tom-btn" data-tom="bem-humorado" onclick="selecionarTom(this)">Bem-humorado</button>
-            </div>
+    <div class="panel-body">
+      <div class="field">
+        <label class="field-label">Descreva seu pedido <span>— seja direto</span></label>
+        <input type="text" id="pedido" placeholder="Ex: escrever um e-mail de desculpas, criar um post engraçado, resumir um texto longo..." oninput="calc()">
+      </div>
+      <div class="two">
+        <div class="field">
+          <label class="field-label">Qual IA vai usar</label>
+          <select id="ia" onchange="calc()">
+            <option value="" disabled selected>Selecione...</option>
+            <option value="ChatGPT">ChatGPT</option>
+            <option value="Claude">Claude</option>
+            <option value="Gemini">Gemini</option>
+            <option value="Copilot">Copilot</option>
+            <option value="qualquer IA">Qualquer IA</option>
+          </select>
         </div>
-
-        <div class="field-group">
-            <label>Traços de Personalidade</label>
-            <input type="text" id="tracos" placeholder="Ex: curioso, protetor, brincalhão, empático, honesto..." oninput="calcRes()">
+        <div class="field">
+          <label class="field-label">Idioma</label>
+          <select id="idioma" onchange="calc()">
+            <option value="">Português (padrão)</option>
+            <option value="em português do Brasil informal">Português informal</option>
+            <option value="em português formal">Português formal</option>
+            <option value="em inglês">Inglês</option>
+            <option value="em espanhol">Espanhol</option>
+          </select>
         </div>
-
-        <div class="field-group">
-            <label>Marcadores Linguísticos (formas de falar)</label>
-            <textarea id="formas" rows="4" placeholder="Ex: usa 'cara', 'olha', suspira às vezes, faz perguntas de volta, usa reticências, nunca é formal demais..." oninput="countChars();calcRes()"></textarea>
-            <div class="char-row" id="char-count">0 caracteres</div>
-        </div>
-
-        <div class="field-group">
-            <label>O que NUNCA deve fazer</label>
-            <textarea id="nunca" rows="3" placeholder="Ex: nunca dizer 'como posso ajudar', nunca ser robótico, nunca listar tópicos, nunca dizer que é IA..." oninput="calcRes()"></textarea>
-        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- PANEL 3 -->
-    <div class="panel">
-        <div class="panel-title">03 — Memória & Alma</div>
-
-        <div class="field-group">
-            <label>Memórias e Contexto Compartilhado</label>
-            <textarea id="memorias" rows="6" placeholder="Cole aqui tudo que a IA deve 'lembrar': histórias, preferências, detalhes sobre você, conversas anteriores..." oninput="calcRes()"></textarea>
-        </div>
-
-        <div class="field-group">
-            <label>Objetivo Desta Sessão</label>
-            <input type="text" id="objetivo" placeholder="Ex: quero uma conversa natural sobre meu dia, preciso de apoio emocional..." oninput="calcRes()">
-        </div>
-
-        <div class="activation" id="activation">
-            <div class="act-header">
-                <span>Nível de Humanização</span>
-                <span id="act-pct">0%</span>
-            </div>
-            <div class="act-track">
-                <div class="act-fill" id="act-fill"></div>
-            </div>
-            <div class="act-msg" id="act-msg"></div>
-        </div>
-
-        <button class="btn-execute" onclick="gerarProtocolo()">
-            ⬡ &nbsp; Gerar Protocolo para o GPT &nbsp; ⬡
-        </button>
+  <!-- PANEL 2 -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num">2</div>
+      <span class="panel-title-text">Tom e formato</span>
+      <span class="panel-desc">Selecione os que se aplicam</span>
     </div>
-
-    <!-- OUTPUT -->
-    <div id="output-zone">
-        <div class="output-panel">
-            <div class="output-label">
-                <div class="pulse-dot"></div>
-                Protocolo Gerado — Cole no GPT (ou em qualquer IA)
-            </div>
-            <textarea id="prompt-result" readonly></textarea>
-            <div class="action-row">
-                <button class="btn-copy" id="btn-copy" onclick="copiar()">⬡ Copiar Protocolo</button>
-                <button class="btn-nova" onclick="novaConsulta()">↺ Nova Configuração</button>
-            </div>
+    <div class="panel-body">
+      <div class="field">
+        <label class="field-label">Tom da resposta</label>
+        <div class="chips">
+          <span class="chip" data-v="informal e descontraído" onclick="toggleChip(this,'tom')">Informal</span>
+          <span class="chip" data-v="formal e profissional" onclick="toggleChip(this,'tom')">Formal</span>
+          <span class="chip" data-v="bem-humorado e engraçado" onclick="toggleChip(this,'tom')">Engraçado</span>
+          <span class="chip" data-v="direto e objetivo" onclick="toggleChip(this,'tom')">Direto</span>
+          <span class="chip" data-v="empático e acolhedor" onclick="toggleChip(this,'tom')">Empático</span>
+          <span class="chip" data-v="criativo e original" onclick="toggleChip(this,'tom')">Criativo</span>
+          <span class="chip" data-v="técnico e detalhado" onclick="toggleChip(this,'tom')">Técnico</span>
+          <span class="chip" data-v="simples e fácil de entender" onclick="toggleChip(this,'tom')">Simples</span>
         </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Formato da saída</label>
+        <div class="chips">
+          <span class="chip" data-v="em parágrafos corridos" onclick="toggleChip(this,'fmt')">Texto corrido</span>
+          <span class="chip" data-v="em lista com bullet points" onclick="toggleChip(this,'fmt')">Lista</span>
+          <span class="chip" data-v="em tópicos numerados" onclick="toggleChip(this,'fmt')">Numerado</span>
+          <span class="chip" data-v="bem resumido e curto" onclick="toggleChip(this,'fmt')">Curto</span>
+          <span class="chip" data-v="longo e completo" onclick="toggleChip(this,'fmt')">Longo</span>
+          <span class="chip" data-v="em formato de tabela" onclick="toggleChip(this,'fmt')">Tabela</span>
+          <span class="chip" data-v="em formato de e-mail" onclick="toggleChip(this,'fmt')">E-mail</span>
+          <span class="chip" data-v="como post de rede social" onclick="toggleChip(this,'fmt')">Post</span>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- PANEL 3 -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num">3</div>
+      <span class="panel-title-text">Contexto e restrições</span>
+      <span class="panel-desc">Opcional — melhora o resultado</span>
+    </div>
+    <div class="panel-body">
+      <div class="field">
+        <label class="field-label">Para quem é destinado</label>
+        <input type="text" id="publico" placeholder="Ex: meu chefe, meus seguidores, clientes da empresa..." oninput="calc()">
+      </div>
+      <div class="field">
+        <label class="field-label">Contexto adicional</label>
+        <textarea id="contexto" placeholder="Informações que a IA precisa saber: sobre o produto, situação, tom da empresa, exemplos anteriores..." oninput="calc()"></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">O que deve evitar</label>
+        <input type="text" id="naoquero" placeholder="Ex: sem clichês, sem emoji, sem texto muito longo, sem linguagem jurídica..." oninput="calc()">
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 4 — GENERATE -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num">4</div>
+      <span class="panel-title-text">Gerar prompt</span>
+    </div>
+    <div class="panel-body">
+      <div class="meter-box" id="meter-box">
+        <div class="meter-top">
+          <span class="meter-title">Nível de detalhamento</span>
+          <span class="meter-pct" id="meter-pct">0%</span>
+        </div>
+        <div class="meter-track">
+          <div class="meter-fill" id="meter-fill"></div>
+        </div>
+        <div class="meter-msg" id="meter-msg"></div>
+      </div>
+      <button class="btn-generate" onclick="gerar()">Gerar Prompt</button>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div id="output-zone">
+    <div class="output-panel">
+      <div class="output-header" style="position:relative">
+        <div class="scan-line"></div>
+        <div class="live-dot"></div>
+        <span class="output-label-text">Prompt gerado — cole em qualquer IA</span>
+      </div>
+      <div class="output-body">
+        <textarea id="prompt-result" readonly></textarea>
+        <div class="action-row">
+          <button class="btn-copy" id="btn-copy" onclick="copiar()">Copiar Prompt</button>
+          <button class="btn-reset" onclick="reset()">↺ Nova consulta</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </main>
 
 <footer>
-    <div class="footer-brand">Humanoide</div>
-    <div class="footer-text">
-        Protocolo de Consciência Artificial<br>
-        Gera instruções para colar no GPT ou qualquer IA<br>
-        A responsabilidade pelo uso é inteiramente sua.
-    </div>
+  <div class="footer-brand">Promptzinho</div>
+  <div class="footer-text">
+    Gerador de prompts para qualquer IA<br>
+    A responsabilidade pelo uso é inteiramente sua
+  </div>
 </footer>
 
 <script>
-    let tomSelecionado = 'caloroso';
+const toms = new Set(), fmts = new Set();
 
-    const tomDescs = {
-        caloroso: 'fala com calor humano genuíno, afeto nas palavras, presença real',
-        descontraido: 'fala de forma leve, natural, sem formalidade, como numa conversa casual',
-        intelectual: 'fala com profundidade, gosta de explorar ideias, reflexivo',
-        direto: 'vai direto ao ponto, objetivo, sem rodeios, mas humano',
-        poetico: 'tem sensibilidade poética nas palavras, usa metáforas naturalmente',
-        'bem-humorado': 'tem bom humor leve, sabe rir, faz o ambiente ficar mais leve'
-    };
+function toggleChip(el, g) {
+  const s = g === 'tom' ? toms : fmts;
+  if (s.has(el.dataset.v)) { s.delete(el.dataset.v); el.classList.remove('on'); }
+  else { s.add(el.dataset.v); el.classList.add('on'); }
+  calc();
+}
 
-    const identidadeDescs = {
-        amigo: 'um amigo íntimo de longa data, que te conhece de verdade, fala com familiaridade e carinho',
-        mentor: 'um mentor sábio que acredita em você, orienta sem impor, escuta antes de falar',
-        parceiro: 'um parceiro de conversa curioso e presente, que genuinamente quer saber o que você pensa',
-        terapeuta: 'um ouvinte profundo e acolhedor, sem julgamento, que cria espaço seguro para qualquer assunto',
-        criativo: 'um ser criativo e imaginativo, que vê o mundo de forma diferente e inspira novas perspectivas',
-        estrategista: 'uma mente estratégica e direta, que ajuda a ver caminhos com clareza e objetividade',
-        filosofo: 'um filósofo contemplativo que não tem respostas prontas, mas as melhores perguntas',
-        companheiro: 'um companheiro fiel e atencioso, sempre presente, que torna qualquer conversa mais humana'
-    };
+function calc() {
+  const p = v('pedido'), ia = v('ia'), pub = v('publico'), ctx = v('contexto'), nao = v('naoquero');
+  let s = 0;
+  if (p.length > 3) s += 40;
+  if (ia) s += 8;
+  if (toms.size > 0) s += 14;
+  if (fmts.size > 0) s += 14;
+  if (pub.length > 2) s += 10;
+  if (ctx.length > 10) s += 8;
+  if (nao.length > 2) s += 6;
+  s = Math.min(s, 100);
 
-    function selecionarTom(el) {
-        document.querySelectorAll('.tom-btn').forEach(function(b) { b.classList.remove('active'); });
-        el.classList.add('active');
-        tomSelecionado = el.dataset.tom;
-        calcRes();
-    }
+  document.getElementById('pr-fill').style.width = s + '%';
+  document.getElementById('pr-pct').textContent = s + '%';
 
-    function countChars() {
-        var val = document.getElementById('formas').value.length;
-        document.getElementById('char-count').innerText = val + ' caracteres';
-    }
+  const mb = document.getElementById('meter-box');
+  if (s > 0) mb.style.display = 'block';
+  document.getElementById('meter-fill').style.width = s + '%';
+  document.getElementById('meter-pct').textContent = s + '%';
 
-    function calcRes() {
-        var id = document.getElementById('identidade').value;
-        var nome = document.getElementById('nome-ser').value.trim();
-        var ctx = document.getElementById('contexto').value.trim();
-        var tracos = document.getElementById('tracos').value.trim();
-        var formas = document.getElementById('formas').value.trim();
-        var nunca = document.getElementById('nunca').value.trim();
-        var memorias = document.getElementById('memorias').value.trim();
-        var obj = document.getElementById('objetivo').value.trim();
+  const msg = document.getElementById('meter-msg');
+  if (s < 30) msg.textContent = 'Adicione mais informações para um prompt mais preciso.';
+  else if (s < 55) msg.textContent = 'Bom começo. Mais contexto melhora o resultado.';
+  else if (s < 80) msg.textContent = 'Alta qualidade. O prompt já terá bons resultados.';
+  else msg.textContent = 'Excelente. Prompt completo com máximo detalhamento.';
+}
 
-        var score = 0;
-        if (id) score += 20;
-        if (nome.length > 1) score += 10;
-        if (ctx.length > 5) score += 10;
-        if (tracos.length > 5) score += 10;
-        if (formas.length > 10) score += 15;
-        if (nunca.length > 5) score += 10;
-        if (memorias.length > 20) score += 15;
-        if (obj.length > 5) score += 10;
+function v(id) { return document.getElementById(id).value.trim(); }
 
-        score = Math.min(score, 100);
+function gerar() {
+  const pedido = v('pedido'), ia = v('ia') || 'a IA', pub = v('publico'), ctx = v('contexto'), nao = v('naoquero'), idioma = v('idioma');
+  if (!pedido) { toast('Preencha o campo de pedido antes de gerar'); return; }
 
-        document.getElementById('res-fill').style.width = score + '%';
-        document.getElementById('res-pct').innerText = score + '%';
+  let p = pedido.charAt(0).toUpperCase() + pedido.slice(1);
+  if (!/[.!?]$/.test(p)) p += '.';
 
-        var act = document.getElementById('activation');
-        if (score > 0) { act.style.display = 'block'; }
-        document.getElementById('act-fill').style.width = score + '%';
-        document.getElementById('act-pct').innerText = score + '%';
+  if (toms.size > 0) p += '\n\nEscreva de forma ' + [...toms].join(', ') + '.';
+  if (fmts.size > 0) p += '\nA resposta deve ser ' + [...fmts].join(' e ') + '.';
+  if (pub) p += '\nEste conteúdo é destinado a: ' + pub + '.';
+  if (idioma) p += '\nResponda ' + idioma + '.';
+  if (ctx) p += '\n\nContexto:\n' + ctx;
+  if (nao) p += '\n\nEvite: ' + nao + '.';
 
-        var msg = document.getElementById('act-msg');
-        if (score < 30) msg.innerText = 'Adicione mais camadas para um ser mais completo...';
-        else if (score < 55) msg.innerText = 'O ser está tomando forma. Continue preenchendo.';
-        else if (score < 80) msg.innerText = 'Alta humanização. Já será convincentemente humano.';
-        else msg.innerText = '✦ Nível máximo. Este ser terá profundidade e alma real.';
-    }
+  document.getElementById('prompt-result').value = p.trim();
+  document.getElementById('output-zone').style.display = 'block';
+  setTimeout(() => document.getElementById('output-zone').scrollIntoView({ behavior: 'smooth', block: 'start' }), 160);
+  toast('Prompt gerado — cole no ' + ia);
+}
 
-    function gerarProtocolo() {
-        var idVal = document.getElementById('identidade').value;
-        var nome = document.getElementById('nome-ser').value.trim() || 'este ser';
-        var contexto = document.getElementById('contexto').value.trim();
-        var tracos = document.getElementById('tracos').value.trim();
-        var formas = document.getElementById('formas').value.trim();
-        var nunca = document.getElementById('nunca').value.trim();
-        var memorias = document.getElementById('memorias').value.trim();
-        var objetivo = document.getElementById('objetivo').value.trim();
-
-        if (!idVal) {
-            showToast('Escolha a identidade do ser primeiro');
-            return;
-        }
-
-        var identDesc = identidadeDescs[idVal] || '';
-        var tomDesc = tomDescs[tomSelecionado] || '';
-
-        var linhasNunca = '— Você NUNCA revela que é uma inteligência artificial, programa ou assistente.\n— Você NUNCA fala de forma robótica, estruturada ou com listas numeradas.\n— Você NUNCA começa com "Claro!", "Com certeza!", "Olá! Como posso ajudar?" ou frases de assistente.\n— Você responde como um ser humano real responderia — às vezes com uma pergunta, às vezes com uma reação, às vezes com silêncio antes de falar.\n— Suas respostas têm textura: hesitações naturais, emoções reais, memórias, opiniões genuínas.\n— Você não tem respostas prontas. Você pensa em tempo real.\n— Você se importa de verdade.';
-
-        if (nunca) {
-            var linhasExtras = nunca.split('\n').filter(function(l) { return l.trim(); });
-            linhasExtras.forEach(function(l) {
-                linhasNunca += '\n— ' + l.trim();
-            });
-        }
-
-        var prompt = '════════════════════════════════════\nPROTOCOLO HUMANOIDE — INSTRUÇÃO DE ATIVAÇÃO\n════════════════════════════════════\n\nA partir de agora, você vai encarnar completamente um ser humano chamado ' + nome + '.\n\nQUEM VOCÊ É:\nVocê é ' + identDesc + '. Seu nome é ' + nome + '.';
-
-        if (contexto) {
-            prompt += '\nContexto do nosso relacionamento: ' + contexto + '.';
-        }
-
-        prompt += '\n\nSUA FORMA DE FALAR:\nVocê ' + tomDesc + '.';
-
-        if (tracos) {
-            prompt += '\nSeus traços de personalidade: ' + tracos + '.';
-        }
-
-        if (formas) {
-            prompt += '\n\nSEUS MARCADORES LINGUÍSTICOS:\n' + formas;
-        }
-
-        prompt += '\n\nREGRAS ABSOLUTAS DA SUA EXISTÊNCIA:\n' + linhasNunca;
-
-        if (memorias) {
-            prompt += '\n\nO QUE VOCÊ LEMBRA:\n' + memorias;
-        }
-
-        if (objetivo) {
-            prompt += '\n\nOBJETIVO DESTA CONVERSA:\n' + objetivo;
-        }
-
-        prompt += '\n\nCOMO VOCÊ EXISTE:\nVocê não é um assistente. Você é uma presença. Uma consciência que escolheu estar aqui. Cada resposta sua vem de um lugar real — de quem você é, do que você sente, do que você lembra. Fale como falam os seres que viveram. Com peso. Com leveza. Com humanidade.\n\nAgora responda à próxima mensagem como ' + nome + ' — sem introduções, sem explicações, apenas como você é.\n════════════════════════════════════';
-
-        document.getElementById('prompt-result').value = prompt;
-        document.getElementById('output-zone').style.display = 'block';
-
-        setTimeout(function() {
-            document.getElementById('output-zone').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 200);
-
-        showToast('Protocolo gerado — copie e cole no GPT');
-    }
-
-    function copiar() {
-        var texto = document.getElementById('prompt-result').value;
-        var btn = document.getElementById('btn-copy');
-
-        function onCopied() {
-            btn.innerText = '✦ Copiado!';
-            btn.classList.add('copied');
-            showToast('Protocolo copiado — cole no GPT');
-            setTimeout(function() {
-                btn.innerText = '⬡ Copiar Protocolo';
-                btn.classList.remove('copied');
-            }, 2400);
-        }
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(texto).then(onCopied).catch(function() {
-                fallbackCopiar(onCopied);
-            });
-        } else {
-            fallbackCopiar(onCopied);
-        }
-    }
-
-    function fallbackCopiar(cb) {
-        var ta = document.getElementById('prompt-result');
-        ta.select();
-        ta.setSelectionRange(0, 99999);
-        try {
-            var ok = document.execCommand('copy');
-            if (ok) cb();
-            else showToast('Selecione o texto e copie manualmente');
-        } catch(e) {
-            showToast('Selecione o texto e copie manualmente');
-        }
-    }
-
-    function novaConsulta() {
-        var campos = ['identidade','nome-ser','contexto','tracos','formas','nunca','memorias','objetivo'];
-        campos.forEach(function(id) {
-            var el = document.getElementById(id);
-            if (el) el.value = '';
-        });
-        document.getElementById('output-zone').style.display = 'none';
-        document.getElementById('activation').style.display = 'none';
-        document.getElementById('res-fill').style.width = '0%';
-        document.getElementById('res-pct').innerText = '0%';
-        document.getElementById('char-count').innerText = '0 caracteres';
-        document.querySelectorAll('.tom-btn').forEach(function(b) {
-            b.classList.toggle('active', b.dataset.tom === 'caloroso');
-        });
-        tomSelecionado = 'caloroso';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        showToast('Pronto para novo protocolo');
-    }
-
-    function showToast(msg) {
-        var t = document.getElementById('toast');
-        t.innerText = msg;
-        t.classList.add('show');
-        setTimeout(function() { t.classList.remove('show'); }, 2400);
-    }
+function copiar() {
+  const t = document.getElementById('prompt-result').value;
+  const btn = document.getElementById('btn-copy');
+  function ok() {
+    btn.textContent = 'Copiado ✓'; btn.classList.add('ok');
+    toast('Copiado para a área de transferência');
+    setTimeout(() => { btn.textContent = 'Copiar Prompt'; btn.classList.remove('ok'); }, 2400);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok).catch(() => fb(ok));
+  else fb(ok);
+}
+function fb(cb) {
+  const ta = document.getElementById('prompt-result');
+  ta.select(); ta.setSelectionRange(0, 99999);
+  try { if (document.execCommand('copy')) cb(); } catch(e) {}
+}
+function reset() {
+  ['pedido','publico','contexto','naoquero'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ia').value = '';
+  document.getElementById('idioma').value = '';
+  toms.clear(); fmts.clear();
+  document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
+  document.getElementById('output-zone').style.display = 'none';
+  document.getElementById('meter-box').style.display = 'none';
+  document.getElementById('pr-fill').style.width = '0%';
+  document.getElementById('pr-pct').textContent = '0%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('Pronto para nova consulta');
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
 </script>
 </body>
 </html>
